@@ -1,0 +1,206 @@
+.collaborative-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: white;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.editor-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #495057;
+}
+
+.editor-title h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dee2e6;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6c757d;
+}
+
+.action-button:hover:not(:disabled) {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.editor-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.editor-textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  padding: 1.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  resize: none;
+  background: white;
+  color: #333;
+}
+
+.editor-textarea::placeholder {
+  color: #adb5bd;
+}
+
+.context-menu {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 160px;
+  overflow: hidden;
+}
+
+.context-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.875rem;
+}
+
+.context-menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 0.875rem;
+  color: #495057;
+}
+
+.context-menu-item:hover {
+  background: #f8f9fa;
+}
+
+.selection-indicator {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background: rgba(102, 126, 234, 0.9);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.editor-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.editor-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.collaboration-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.active-users {
+  color: #28a745;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .editor-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .editor-title h3 {
+    font-size: 1rem;
+  }
+  
+  .editor-actions {
+    gap: 0.25rem;
+  }
+  
+  .action-button {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .editor-textarea {
+    padding: 1rem;
+    font-size: 14px;
+  }
+  
+  .editor-footer {
+    padding: 0.5rem 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .editor-stats {
+    gap: 0.75rem;
+  }
+  
+  .context-menu {
+    min-width: 140px;
+  }
+  
+  .selection-indicator {
+    bottom: 0.5rem;
+    right: 0.5rem;
+    padding: 0.375rem 0.75rem;
+  }
+}

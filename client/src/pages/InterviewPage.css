@@ -1,0 +1,80 @@
+.interview-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.interview-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.editor-section {
+  transition: width 0.3s ease;
+  background: white;
+  border-right: 1px solid #e9ecef;
+}
+
+.editor-section.full-width {
+  width: 100%;
+}
+
+.editor-section.with-code-runner {
+  width: 60%;
+}
+
+.code-runner-section {
+  width: 40%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.interview-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.error-container {
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.error-container h2 {
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.error-container p {
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .interview-layout {
+    flex-direction: column;
+  }
+  
+  .editor-section.with-code-runner {
+    width: 100%;
+    height: 50%;
+  }
+  
+  .code-runner-section {
+    width: 100%;
+    height: 50%;
+    border-right: none;
+    border-top: 1px solid #e9ecef;
+  }
+}

@@ -2,8 +2,33 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '../contexts/SessionContext';
 import { useSocket } from '../contexts/SocketContext';
-import { Users, Video, Code, Shield } from 'lucide-react';
+import { Users, Video, Code2, Shield, ArrowRight, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ThemeToggle from '../components/ThemeToggle';
+import './HomePage.css';
+
+const FEATURE_CARDS = [
+  {
+    title: 'Real-time collaboration',
+    description: 'Latency-free text editing with synced cursors, selections, and code execution results.',
+    icon: <Users size={22} />
+  },
+  {
+    title: 'Code ready workspace',
+    description: 'Batteries-included Monaco editor with multiple languages, test cases, and execution sandbox.',
+    icon: <Code2 size={22} />
+  },
+  {
+    title: 'Built for interviews',
+    description: 'Session roles, connection health, and exportable transcripts keep interviews focused.',
+    icon: <Shield size={22} />
+  },
+  {
+    title: 'Video friendly',
+    description: 'Designed to sit comfortably beside your favourite video platform for shared context.',
+    icon: <Video size={22} />
+  }
+];
 
 function HomePage() {
   const [sessionId, setSessionId] = useState('');
@@ -14,25 +39,22 @@ function HomePage() {
   const { initializeSocket } = useSocket();
 
   const handleCreateSession = async () => {
-    console.log('Create session button clicked, role:', createRole);
     try {
-      console.log('Calling createSession...');
       const result = await createSession(createRole);
-      console.log('Session created:', result);
-      
+
       localStorage.setItem('sessionFlow', 'create');
       localStorage.setItem('userRole', createRole);
-      localStorage.setItem('currentSessionId', result.sessionId); // Save session ID
-      localStorage.setItem('currentUserId', result.userId); // Save user ID
-      
-      // Initialize socket AFTER successful session creation
-      console.log('Initializing socket...');
+      localStorage.setItem('currentSessionId', result.sessionId);
+      if (result.userId) {
+        localStorage.setItem('currentUserId', result.userId);
+      } else {
+        localStorage.removeItem('currentUserId');
+      }
+
       initializeSocket();
-      
-      toast.success('Session created successfully!');
+      toast.success('Session created successfully');
       navigate(`/interview/${result.sessionId}`);
-    } catch (error) {
-      console.error('Create session error:', error);
+    } catch (createError) {
       toast.error('Failed to create session');
     }
   };
@@ -43,13 +65,10 @@ function HomePage() {
       return;
     }
 
-    // Prevent double-clicks during loading
     if (isLoading) {
-      console.log('Join already in progress, ignoring click');
       return;
     }
 
-    // Check if user is trying to join their own session
     const currentSessionId = localStorage.getItem('currentSessionId');
     if (currentSessionId === sessionId.trim()) {
       toast.error('You cannot join your own session. Share this session ID with another person.');
@@ -57,169 +76,96 @@ function HomePage() {
     }
 
     try {
-      console.log('=== HomePage.handleJoinSession CALLED ===');
-      console.log('Session ID:', sessionId.trim());
-      console.log('Join Role:', joinRole);
-      console.log('Is Loading:', isLoading);
-      console.log('==========================================');
-      
-      // Join session first via HTTP API
       const result = await joinSession(sessionId.trim(), joinRole);
       localStorage.setItem('sessionFlow', 'join');
       localStorage.setItem('userRole', joinRole);
-      localStorage.setItem('currentUserId', result.userId); // Store the user ID
-      
-      // Initialize socket AFTER successful join
+      localStorage.setItem('currentUserId', result.userId);
+
       initializeSocket();
-      
-      toast.success('Joined session successfully!');
-      navigate(`/interview/${sessionId}`);
-    } catch (error) {
-      toast.error(error.message || 'Failed to join session');
-    }
-  };
-
-  const checkSessionStatus = async () => {
-    if (!sessionId.trim()) {
-      toast.error('Please enter a session ID');
-      return;
-    }
-
-    const sessionIdToCheck = sessionId.trim();
-    console.log('Checking status for session ID:', sessionIdToCheck);
-
-    try {
-      const url = `http://localhost:5000/api/sessions/${sessionIdToCheck}/status`;
-      console.log('Making request to:', url);
-      
-      const response = await fetch(url);
-      console.log('Response status:', response.status);
-      
-      const data = await response.json();
-      console.log('Session status response:', data);
-      
-      if (response.ok && data.sessionId) {
-        alert(`Session Status:
-ID: ${data.sessionId}
-Total Users: ${data.userCount}
-Active Users: ${data.activeUserCount}
-User Details: ${JSON.stringify(data.users, null, 2)}`);
-      } else {
-        alert('Session not found: ' + (data.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Error checking session status:', error);
-      alert('Failed to check session status: ' + error.message);
-    }
-  };
-
-  const listAllSessions = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/sessions/debug/all');
-      const data = await response.json();
-      console.log('All sessions:', data);
-      
-      if (response.ok) {
-        alert(`All Sessions:
-Total: ${data.totalSessions || 0}
-Active: ${data.activeSessions || 0}
-Session IDs: ${JSON.stringify(data.sessions || [], null, 2)}`);
-      } else {
-        alert('Failed to get sessions: ' + (data.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Error listing sessions:', error);
-      alert('Failed to list sessions: ' + error.message);
+      toast.success('Joined session successfully');
+      navigate(`/interview/${sessionId.trim()}`);
+    } catch (joinError) {
+      toast.error(joinError.message || 'Failed to join session');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <Code className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold text-gray-800">Virtual Interview Platform</h1>
-            </div>
-          </div>
+    <div className="home">
+      <div className="home__backdrop" />
+
+      <header className="home__nav container">
+        <div className="home__brand">
+          <Sparkles size={24} />
+          <span>Intervue Studio</span>
+        </div>
+        <div className="home__actions">
+          <ThemeToggle />
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-12">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-800 mb-4">
-            Collaborative Technical Interviews
-          </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Conduct seamless technical interviews with real-time collaboration, 
-            text editing, and integrated code testing capabilities.
-          </p>
-        </div>
-
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-              <Users className="w-6 h-6 text-blue-600" />
+      <main className="home__content container">
+        <section className="home__hero glass-panel">
+          <div className="home__hero-content">
+            <p className="home__eyebrow">High Signal Interviews</p>
+            <h1>Run technical interviews that feel collaborative and natural.</h1>
+            <p className="home__subtitle">
+              Share instant workspaces, follow every keystroke, and evaluate code in seconds. Designed for interviewers who care about experience and insight.
+            </p>
+            <div className="home__cta">
+              <button
+                onClick={handleCreateSession}
+                disabled={isLoading}
+                className="button"
+              >
+                Start a session
+                <ArrowRight size={18} />
+              </button>
+              <button
+                onClick={() => {
+                  const form = document.getElementById('join-card');
+                  if (form) {
+                    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+                className="button button-secondary"
+              >
+                Join with code
+              </button>
             </div>
-            <h3 className="font-semibold text-gray-800 mb-2">Real-time Collaboration</h3>
-            <p className="text-gray-600 text-sm">
-              Two users can edit and collaborate simultaneously with live updates.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <Code className="w-6 h-6 text-green-600" />
+            <div className="home__meta">
+              <div>
+                <span className="home__meta-value"><Users size={16} /> Two roles</span>
+                <p>Interviewer & candidate flows built-in.</p>
+              </div>
+              <div>
+                <span className="home__meta-value"><Code2 size={16} /> Monaco editor</span>
+                <p>Languages, tests, execution out of the box.</p>
+              </div>
+              <div>
+                <span className="home__meta-value"><Shield size={16} /> Secure by design</span>
+                <p>Ephemeral sessions with inactivity cleanup.</p>
+              </div>
             </div>
-            <h3 className="font-semibold text-gray-800 mb-2">Code Conversion</h3>
-            <p className="text-gray-600 text-sm">
-              Convert selected text to executable code with syntax highlighting.
-            </p>
           </div>
+        </section>
 
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <Video className="w-6 h-6 text-purple-600" />
+        <section className="home__forms">
+          <div className="home__card glass-panel">
+            <div className="home__card-header">
+              <div className="home__card-icon home__card-icon--create">
+                <Sparkles size={18} />
+              </div>
+              <div>
+                <h3>Create a fresh session</h3>
+                <p>Generate a secure workspace and invite your candidate instantly.</p>
+              </div>
             </div>
-            <h3 className="font-semibold text-gray-800 mb-2">Integrated Testing</h3>
-            <p className="text-gray-600 text-sm">
-              Run code with custom inputs and see outputs in real-time.
-            </p>
-          </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-              <Shield className="w-6 h-6 text-red-600" />
-            </div>
-            <h3 className="font-semibold text-gray-800 mb-2">Secure Execution</h3>
-            <p className="text-gray-600 text-sm">
-              Sandboxed code execution environment for safe testing.
-            </p>
-          </div>
-        </div>
-
-        {/* Action Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Create Session */}
-          <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">Create New Session</h3>
-            <p className="text-gray-600 mb-6">
-              Start a new interview session and share the session ID with your candidate.
-            </p>
-            
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Your Role
-              </label>
+            <div className="home__field">
+              <label>Your role</label>
               <select
                 value={createRole}
-                onChange={(e) => setCreateRole(e.target.value)}
+                onChange={(event) => setCreateRole(event.target.value)}
                 className="input"
                 disabled={isLoading}
               >
@@ -231,40 +177,40 @@ Session IDs: ${JSON.stringify(data.sessions || [], null, 2)}`);
             <button
               onClick={handleCreateSession}
               disabled={isLoading}
-              className="button button-primary w-full"
+              className="button"
             >
-              {isLoading ? 'Creating...' : 'Create Session'}
+              {isLoading ? 'Creating...' : 'Create session'}
             </button>
           </div>
 
-          {/* Join Session */}
-          <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">Join Existing Session</h3>
-            <p className="text-gray-600 mb-6">
-              Enter the session ID provided by your interviewer to join the session.
-            </p>
-            
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Session ID
-              </label>
+          <div className="home__card glass-panel" id="join-card">
+            <div className="home__card-header">
+              <div className="home__card-icon home__card-icon--join">
+                <Users size={18} />
+              </div>
+              <div>
+                <h3>Join with a session code</h3>
+                <p>Hop directly into the interviewer’s workspace with the code they shared.</p>
+              </div>
+            </div>
+
+            <div className="home__field">
+              <label>Session ID</label>
               <input
                 type="text"
                 value={sessionId}
-                onChange={(e) => setSessionId(e.target.value)}
-                placeholder="Enter session ID"
+                onChange={(event) => setSessionId(event.target.value)}
+                placeholder="e.g. 4f3b9c28-..."
                 className="input"
                 disabled={isLoading}
               />
             </div>
 
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Your Role
-              </label>
+            <div className="home__field">
+              <label>Your role</label>
               <select
                 value={joinRole}
-                onChange={(e) => setJoinRole(e.target.value)}
+                onChange={(event) => setJoinRole(event.target.value)}
                 className="input"
                 disabled={isLoading}
               >
@@ -276,66 +222,32 @@ Session IDs: ${JSON.stringify(data.sessions || [], null, 2)}`);
             <button
               onClick={handleJoinSession}
               disabled={isLoading || !sessionId.trim()}
-              className="button button-primary w-full mb-2"
+              className="button"
             >
-              {isLoading ? 'Joining...' : 'Join Session'}
-            </button>
-            
-            <button
-              onClick={checkSessionStatus}
-              disabled={!sessionId.trim()}
-              className="button w-full bg-gray-500 hover:bg-gray-600 text-white mb-2"
-            >
-              Debug: Check Session Status
-            </button>
-            
-            <button
-              onClick={listAllSessions}
-              className="button w-full bg-purple-500 hover:bg-purple-600 text-white"
-            >
-              Debug: List All Sessions
+              {isLoading ? 'Joining…' : 'Join session'}
             </button>
           </div>
-        </div>
+        </section>
 
-        {/* Error Display */}
         {error && (
-          <div className="mt-8 max-w-2xl mx-auto">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-700 text-center">{error}</p>
-            </div>
+          <div className="home__error glass-panel">
+            <p>{error}</p>
           </div>
         )}
 
-        {/* Instructions */}
-        <div className="mt-16 max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">How to Use</h3>
-            <div className="grid md:grid-cols-2 gap-6 text-sm text-gray-600">
-              <div>
-                <h4 className="font-semibold text-gray-800 mb-2">For Interviewers:</h4>
-                <ol className="list-decimal list-inside space-y-1">
-                  <li>Create a new session</li>
-                  <li>Share the session ID with the candidate</li>
-                  <li>Start collaborating on technical problems</li>
-                  <li>Convert text to code and test solutions</li>
-                </ol>
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-800 mb-2">For Candidates:</h4>
-                <ol className="list-decimal list-inside space-y-1">
-                  <li>Receive the session ID from your interviewer</li>
-                  <li>Join the session using the provided ID</li>
-                  <li>Collaborate in real-time on problem solving</li>
-                  <li>Write and test your code solutions</li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        </div>
+        <section className="home__features">
+          {FEATURE_CARDS.map((feature) => (
+            <article key={feature.title} className="home__feature-card glass-panel">
+              <div className="home__feature-icon">{feature.icon}</div>
+              <h4>{feature.title}</h4>
+              <p>{feature.description}</p>
+            </article>
+          ))}
+        </section>
       </main>
     </div>
   );
 }
 
 export default HomePage;
+

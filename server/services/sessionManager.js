@@ -22,7 +22,9 @@ class SessionManager {
         selectedText: '',
         language: 'javascript',
         code: '',
-        testCases: []
+        testCases: [],
+        executionResults: [],
+        lastExecutedAt: null
       }
     };
 

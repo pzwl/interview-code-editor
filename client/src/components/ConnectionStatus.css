@@ -1,0 +1,56 @@
+.connection-status {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 1200;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: var(--blur-glass);
+  pointer-events: none;
+}
+
+.connection-status__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.connection-status.is-connected {
+  background: rgba(16, 185, 129, 0.16);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.connection-status.is-disconnected {
+  background: rgba(248, 113, 113, 0.18);
+  color: #7f1d1d;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  animation: connection-pulse 2s infinite;
+}
+
+@keyframes connection-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.72;
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 768px) {
+  .connection-status {
+    bottom: 1rem;
+    right: 1rem;
+    font-size: 0.75rem;
+    padding: 0.45rem 0.9rem;
+  }
+}

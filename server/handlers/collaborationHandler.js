@@ -217,17 +217,24 @@ function collaborationHandler(socket, io, sessions) {
   });
 
   // Handle code execution results
-  socket.on('code-execution-result', (data) => {
+  socket.on('code-execution-result', (data = {}) => {
     const session = sessions.getSessionBySocket(socket.id);
     const user = sessions.getUserBySocket(socket.id);
-    
+
     if (!session || !user) return;
 
-    // Broadcast execution results to all users
+    const ranAt = data.ranAt || new Date().toISOString();
+
+    sessions.updateCodeState(session.id, {
+      executionResults: Array.isArray(data.results) ? data.results : [],
+      lastExecutedAt: ranAt
+    });
+
     io.to(session.id).emit('code-execution-result', {
       ...data,
+      ranAt,
       executedBy: user.id,
-      timestamp: new Date()
+      timestamp: new Date().toISOString()
     });
   });
 

@@ -9,6 +9,7 @@ export function SocketProvider({ children }) {
   const socket = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
   const [lastPingTime, setLastPingTime] = useState(null);
+  const [peerCursors, setPeerCursors] = useState({});
   const { 
     sessionId, 
     userId, 
@@ -40,6 +41,7 @@ export function SocketProvider({ children }) {
       transports: ['websocket'], 
       timeout: 20000,
     });
+    setPeerCursors({});
 
     // Connection event handlers
     socket.current.on('connect', () => {
@@ -53,6 +55,7 @@ export function SocketProvider({ children }) {
       console.log('Disconnected from server:', reason);
       setIsConnected(false);
       setConnectionStatus(false);
+      setPeerCursors({});
       toast.error('Disconnected from server');
     });
 
@@ -60,6 +63,7 @@ export function SocketProvider({ children }) {
       console.error('Connection error:', error);
       setIsConnected(false);
       setConnectionStatus(false);
+      setPeerCursors({});
       toast.error('Connection failed');
     });
 
@@ -97,7 +101,7 @@ export function SocketProvider({ children }) {
     });
 
     // Handle session updates (user list changes)
-    socket.current.on('session-update', (data) => {
+    socket.current.on('session-update', (data = {}) => {
       console.log('Session update event received:', data);
       if (data.users) {
         console.log('Session update users:', data.users.map(u => ({ 
@@ -107,6 +111,18 @@ export function SocketProvider({ children }) {
         })));
       }
       updateSessionState(data);
+      if (Array.isArray(data.users)) {
+        const activeIds = new Set(data.users.filter((user) => user.active).map((user) => user.id));
+        setPeerCursors((previous) => {
+          const next = {};
+          for (const [id, cursor] of Object.entries(previous)) {
+            if (activeIds.has(id)) {
+              next[id] = cursor;
+            }
+          }
+          return next;
+        });
+      }
     });
 
     // Document collaboration handlers
@@ -114,9 +130,19 @@ export function SocketProvider({ children }) {
       updateDocument(data.document);
     });
 
-    socket.current.on('cursor-position', (data) => {
-      // Handle cursor position updates from other users
-      // This would be used to show other user's cursor
+    socket.current.on('cursor-position', (data = {}) => {
+      if (!data.userId) {
+        return;
+      }
+
+      setPeerCursors((previous) => ({
+        ...previous,
+        [data.userId]: {
+          position: typeof data.position === 'number' ? data.position : 0,
+          selection: data.selection || null,
+          updatedAt: Date.now(),
+        },
+      }));
     });
 
     // Code collaboration handlers
@@ -137,11 +163,18 @@ export function SocketProvider({ children }) {
       updateCodeState({ testCases: data.testCases });
     });
 
-    socket.current.on('code-execution-result', (data) => {
-      // Handle code execution results
-      // This would be handled by the CodeRunner component
-    });
+    socket.current.on('code-execution-result', (data = {}) => {
+      const results = Array.isArray(data.results) ? data.results : [];
+      updateCodeState({
+        executionResults: results,
+        lastExecutedAt: data.ranAt || new Date().toISOString()
+      });
 
+      if (results.length && data.executedBy && data.executedBy !== userId) {
+        const passed = results.filter((item) => item.status === 'passed').length;
+        toast.success(`Tests updated: ${passed}/${results.length} passed`);
+      }
+    });
     // Session control handlers
     socket.current.on('session-control', (data) => {
       const { action, controlledBy } = data;
@@ -252,6 +285,7 @@ export function SocketProvider({ children }) {
     socket: socket.current,
     isConnected,
     lastPingTime,
+    peerCursors,
     initializeSocket,
     joinSession,
     emitDocumentOperation,

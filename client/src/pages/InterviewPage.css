@@ -1,35 +1,120 @@
+.interview-join {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 40;
+  backdrop-filter: blur(12px);
+}
+
+.interview-join__backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 20%, rgba(129, 140, 248, 0.25), transparent 55%),
+    radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.25), transparent 55%);
+  filter: blur(60px);
+  opacity: 0.8;
+}
+
+.interview-join__dialog {
+  position: relative;
+  width: min(420px, 100%);
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  text-align: left;
+}
+
+.interview-join__dialog h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.interview-join__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.interview-join__actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.interview-join__error {
+  padding: 0.85rem 1rem;
+  background: rgba(239, 68, 68, 0.12);
+  border-radius: 14px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .interview-join__dialog {
+    padding: 2rem;
+  }
+
+  .interview-join__actions {
+    flex-direction: column;
+  }
+}
+
 .interview-page {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background-color: #f8f9fa;
+  min-height: 100vh;
+  gap: 1.5rem;
+  padding: 1.5rem 0 3rem;
 }
 
 .interview-layout {
   display: flex;
+  gap: 1.5rem;
   flex: 1;
+  min-height: 0;
+  padding: 0 2rem 2rem;
+}
+
+.editor-section,
+.code-runner-section {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 26px;
+  border: 1px solid var(--color-elevated-border);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: var(--blur-glass);
+  background: var(--color-surface);
   overflow: hidden;
 }
 
 .editor-section {
   transition: width 0.3s ease;
-  background: white;
-  border-right: 1px solid #e9ecef;
+}
+
+.editor-section > * {
+  min-height: 0;
 }
 
 .editor-section.full-width {
-  width: 100%;
+  flex: 1 1 auto;
 }
 
 .editor-section.with-code-runner {
-  width: 60%;
+  flex: 0 0 65%;
 }
 
 .code-runner-section {
-  width: 40%;
-  background: white;
-  display: flex;
-  flex-direction: column;
+  flex: 0 0 35%;
+  max-height: calc(100vh - 220px);
 }
 
 .interview-error {
@@ -37,44 +122,54 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background: var(--color-bg);
+  padding: 2rem;
 }
 
 .error-container {
   text-align: center;
   padding: 2rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
+  border-radius: 20px;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  background: rgba(248, 113, 113, 0.08);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 25px 55px rgba(248, 113, 113, 0.18);
+  max-width: 420px;
   width: 100%;
 }
 
 .error-container h2 {
-  color: #dc3545;
+  color: var(--color-danger);
   margin-bottom: 1rem;
 }
 
 .error-container p {
-  color: #6c757d;
+  color: var(--color-text-secondary);
   margin-bottom: 1.5rem;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
+  .interview-layout {
+    padding: 0 1.5rem 2rem;
+  }
+
+  .editor-section.with-code-runner {
+    flex: 0 0 60%;
+  }
+
+  .code-runner-section {
+    flex: 0 0 40%;
+  }
+}
+
+@media (max-width: 900px) {
   .interview-layout {
     flex-direction: column;
   }
-  
-  .editor-section.with-code-runner {
-    width: 100%;
-    height: 50%;
-  }
-  
+
+  .editor-section.with-code-runner,
   .code-runner-section {
-    width: 100%;
-    height: 50%;
-    border-right: none;
-    border-top: 1px solid #e9ecef;
+    flex: 1 1 auto;
+    max-height: none;
   }
 }
